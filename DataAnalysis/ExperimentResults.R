@@ -1007,7 +1007,7 @@ ols.5 <- lm( data = matching.data, formula=group.seller_payoff ~ sub + period)
 summary(ols.5)
 
 ##################################
-### Individual strategies ###
+### Seller strategies ###
 ##################################
 
 ### Regression Analysis ###
@@ -1047,6 +1047,7 @@ reg.vol.seller <-
 
 bid.reg1 <- lmer(bid ~ lag.bid + lag.comp.bid + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + 
                    (1|subject.id) + (1|cohort.number), data = reg.vol.seller)
+summary(bid.reg1)
 
 reg.mu1.seller$risk.1 <- as.numeric(reg.mu1.seller$player.risk1)
 reg.mu1.seller$risk.2 <- as.numeric(reg.mu1.seller$player.risk2)
@@ -1116,58 +1117,7 @@ stargazer::stargazer(bid.reg1,bid.reg2,bid.reg3,quality.reg1,quality.reg2,qualit
 # Text to column fixed width into Excel then into Word
 ## Custom format SD cells in Excel #,##0.000;(#,##0.000)
 
-  # Buyer price proposals / surplus (mixed effects linear regression) 
-
-reg.vol.buyer <- subset(Voluntary, role == "Buyer")
-reg.mu1.buyer<- subset(Arbitrator, role == "Buyer" & sub == "mu1")
-reg.mu2.buyer<- subset(Arbitrator, role == "Buyer" & sub == "mu2")
-
-reg.vol.buyer$risk.1 <- as.numeric(reg.vol.buyer$player.risk1)
-reg.vol.buyer$risk.2 <- as.numeric(reg.vol.buyer$player.risk2)
-reg.vol.buyer$trust.1 <- as.numeric(reg.vol.buyer$player.trust.index)
-reg.vol.buyer$trust.2 <- as.factor(as.numeric(reg.vol.buyer$player.trust_strangers) - 1)
-reg.vol.buyer$female <- as.factor(ifelse(reg.vol.buyer$player.gender == "Female", 1, 0))
-reg.vol.buyer$econ <- as.factor(reg.vol.buyer$econ)
-
-reg.vol.buyer <- reg.vol.buyer[order(reg.vol.buyer$subject.id, reg.vol.buyer$period),]
-
-proposal.reg1 <- lmer(ypct ~ bid.low + product.quality + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + 
-                   (1|subject.id) + (1|cohort.number), data = reg.vol.buyer)
-
-reg.mu1.buyer$risk.1 <- as.numeric(reg.mu1.buyer$player.risk1)
-reg.mu1.buyer$risk.2 <- as.numeric(reg.mu1.buyer$player.risk2)
-reg.mu1.buyer$trust.1 <- as.numeric(reg.mu1.buyer$player.trust.index)
-reg.mu1.buyer$trust.2 <- as.factor(as.numeric(reg.mu1.buyer$player.trust_strangers) - 1)
-reg.mu1.buyer$female <- as.factor(ifelse(reg.mu1.buyer$player.gender == "Female", 1, 0))
-reg.mu1.buyer$econ <- as.factor(reg.mu1.buyer$econ)
-
-reg.mu1.buyer <- reg.mu1.buyer[order(reg.mu1.buyer$subject.id, reg.mu1.buyer$period),]
-
-proposal.reg2 <- lmer(ypct ~ bid.low + product.quality + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + order + 
-                        (1|subject.id) + (1|cohort.number), data = reg.mu1.buyer)
-
-reg.mu2.buyer$risk.1 <- as.numeric(reg.mu2.buyer$player.risk1)
-reg.mu2.buyer$risk.2 <- as.numeric(reg.mu2.buyer$player.risk2)
-reg.mu2.buyer$trust.1 <- as.numeric(reg.mu2.buyer$player.trust.index)
-reg.mu2.buyer$trust.2 <- as.factor(as.numeric(reg.mu2.buyer$player.trust_strangers) - 1)
-reg.mu2.buyer$female <- as.factor(ifelse(reg.mu2.buyer$player.gender == "Female", 1, 0))
-reg.mu2.buyer$econ <- as.factor(reg.mu2.buyer$econ)
-
-reg.mu2.buyer <- reg.mu2.buyer[order(reg.mu2.buyer$subject.id, reg.mu2.buyer$period),]
-
-proposal.reg3 <- lmer(ypct ~ bid.low + product.quality + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + order + 
-                        (1|subject.id) + (1|cohort.number), data = reg.mu2.buyer)
-
-stargazer::stargazer(proposal.reg1,proposal.reg2,proposal.reg3, type="text",
-                     column.labels=c("Voluntary","Arb 1/3","Arb 2/3"), 
-                     dep.var.labels = c("Price proposal / surplus"), keep.stat=c("n","ll"),
-                     keep=c("bid.low","product.quality","period","order","risk.1","risk.2","Constant"), align = TRUE, digits = 3, 
-                     out="DataAnalysis/buyer_reg.txt")
-
-# Text to column fixed width into Excel then into Word
-## Custom format SD cells in Excel #,##0.000;(#,##0.000)
-
-### Individual Seller Strategies ###
+### Strategy classification ###
 
   # Theory (Risk Neutral case)
 
@@ -1369,7 +1319,7 @@ p
 
 dev.off()
 
-# Animation for presentation
+# Animation
 
 cohort.seller.strategy.arb$time <- as.integer(cohort.seller.strategy.arb$time)
 
@@ -1569,7 +1519,11 @@ p
 
 dev.off()
 
-### Individual Buyer Strategies ###
+##################################
+### Buyer strategies ###
+##################################
+
+### Strategy classification ###
 
 buyer.strategy.arb <- subset(Arbitrator, role == "Buyer")
 
@@ -1579,16 +1533,35 @@ buyer.strategy.vol <- subset(Voluntary, role == "Buyer")
 
   # Overall
 
-buyer.strategy.arb <- mutate(buyer.strategy.arb, lower = ifelse(y <= floor + 1, 1, ifelse(is.na(y), NA, 0)), mimic = ifelse(y >= pA - 1 & y <= pA + 1, 1, ifelse(is.na(y), NA, 0)), count = ifelse(!is.na(y), 1, NA))
+buyer.strategy.arb <- mutate(buyer.strategy.arb, pA.alt = ifelse(sub == "mu1", 
+                                                                 pmin(bid.low, par.mu2*(subsession.value_low+product.quality*(subsession.value_high - subsession.value_low)) + (1-par.mu2)*(subsession.cost_low+product.quality*(subsession.cost_high - subsession.cost_low))), 
+                                                                 pmin(bid.low, par.mu1*(subsession.value_low+product.quality*(subsession.value_high - subsession.value_low)) + (1-par.mu1)*(subsession.cost_low+product.quality*(subsession.cost_high - subsession.cost_low)))))
+
+buyer.strategy.arb <- mutate(buyer.strategy.arb, lower = ifelse(y <= floor + 1, 1, ifelse(is.na(y), NA, 0)), mimic = ifelse(y >= pA - 1 & y <= pA + 1, 1, ifelse(is.na(y), NA, 0)), count = ifelse(!is.na(y), 1, NA), mimic.pseudo = ifelse(y >= pA.alt - 1 & y <= pA.alt + 1, 1, ifelse(is.na(y), NA, 0)))
+
+buyer.strategy.arb <- mutate(buyer.strategy.arb, above = ifelse(y > pA + 1, 1, ifelse(is.na(y), NA, 0)), between = ifelse(y >= floor + 1 & y <= pA - 1, 1, ifelse(is.na(y), NA, 0)))
 
 summary(buyer.strategy.arb$lower)
 summary(buyer.strategy.arb$mimic)
+summary(buyer.strategy.arb$mimic.pseudo)
+summary(buyer.strategy.arb$above)
+summary(buyer.strategy.arb$between)
 tapply(buyer.strategy.arb$lower, buyer.strategy.arb$sub, summary)
 tapply(buyer.strategy.arb$mimic, buyer.strategy.arb$sub, summary)
+tapply(buyer.strategy.arb$mimic.pseudo, buyer.strategy.arb$sub, summary)
+tapply(buyer.strategy.arb$above, buyer.strategy.arb$sub, summary)
+tapply(buyer.strategy.arb$between, buyer.strategy.arb$sub, summary)
 
-buyer.strategy.vol <- mutate(buyer.strategy.vol, lower = ifelse(y <= floor + 1, 1, ifelse(is.na(y), NA, 0)), count = ifelse(!is.na(y), 1, NA))
 
+buyer.strategy.vol <- mutate(buyer.strategy.vol, 
+                             pA.mu1 = pmin(bid.low, par.mu1*(subsession.value_low+product.quality*(subsession.value_high - subsession.value_low)) + (1-par.mu1)*(subsession.cost_low+product.quality*(subsession.cost_high - subsession.cost_low))), 
+                             pA.mu2 = pmin(bid.low, par.mu2*(subsession.value_low+product.quality*(subsession.value_high - subsession.value_low)) + (1-par.mu2)*(subsession.cost_low+product.quality*(subsession.cost_high - subsession.cost_low)))) 
+
+buyer.strategy.vol <- mutate(buyer.strategy.vol, lower = ifelse(y <= floor + 1, 1, ifelse(is.na(y), NA, 0)), mimic.1 = ifelse(y >= pA.mu1 - 1 & y <= pA.mu1 + 1, 1, ifelse(is.na(y), NA, 0)), count = ifelse(!is.na(y), 1, NA), mimic.2 = ifelse(y >= pA.mu2 - 1 & y <= pA.mu2 + 1, 1, ifelse(is.na(y), NA, 0)))
+                                                                 
 summary(buyer.strategy.vol$lower)
+summary(buyer.strategy.vol$mimic.1)
+summary(buyer.strategy.vol$mimic.2)
 
   # By quality
 
@@ -1757,7 +1730,7 @@ p
 
 dev.off()
 
-# Animation for presentation
+# Animation
 
 cohort.buyer.strategy.arb$time <- as.integer(cohort.buyer.strategy.arb$time)
 
@@ -1908,3 +1881,60 @@ p <- ggplot(subset(trade.data.vol, product.quality == "1"), aes(x=group.buyer_pa
 p
 
 dev.off()
+
+### Archived Regression Analysis of buyer determinants ###
+
+# Multi-level modelling of decision variables #
+
+library(arm) # for multi-level modelling - do not load for sim in next part
+
+# Buyer price proposals / surplus (mixed effects linear regression) 
+
+reg.vol.buyer <- subset(Voluntary, role == "Buyer")
+reg.mu1.buyer<- subset(Arbitrator, role == "Buyer" & sub == "mu1")
+reg.mu2.buyer<- subset(Arbitrator, role == "Buyer" & sub == "mu2")
+
+reg.vol.buyer$risk.1 <- as.numeric(reg.vol.buyer$player.risk1)
+reg.vol.buyer$risk.2 <- as.numeric(reg.vol.buyer$player.risk2)
+reg.vol.buyer$trust.1 <- as.numeric(reg.vol.buyer$player.trust.index)
+reg.vol.buyer$trust.2 <- as.factor(as.numeric(reg.vol.buyer$player.trust_strangers) - 1)
+reg.vol.buyer$female <- as.factor(ifelse(reg.vol.buyer$player.gender == "Female", 1, 0))
+reg.vol.buyer$econ <- as.factor(reg.vol.buyer$econ)
+
+reg.vol.buyer <- reg.vol.buyer[order(reg.vol.buyer$subject.id, reg.vol.buyer$period),]
+
+proposal.reg1 <- lmer(ypct ~ bid.low + product.quality + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + 
+                        (1|subject.id) + (1|cohort.number), data = reg.vol.buyer)
+
+reg.mu1.buyer$risk.1 <- as.numeric(reg.mu1.buyer$player.risk1)
+reg.mu1.buyer$risk.2 <- as.numeric(reg.mu1.buyer$player.risk2)
+reg.mu1.buyer$trust.1 <- as.numeric(reg.mu1.buyer$player.trust.index)
+reg.mu1.buyer$trust.2 <- as.factor(as.numeric(reg.mu1.buyer$player.trust_strangers) - 1)
+reg.mu1.buyer$female <- as.factor(ifelse(reg.mu1.buyer$player.gender == "Female", 1, 0))
+reg.mu1.buyer$econ <- as.factor(reg.mu1.buyer$econ)
+
+reg.mu1.buyer <- reg.mu1.buyer[order(reg.mu1.buyer$subject.id, reg.mu1.buyer$period),]
+
+proposal.reg2 <- lmer(ypct ~ bid.low + product.quality + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + order + 
+                        (1|subject.id) + (1|cohort.number), data = reg.mu1.buyer)
+
+reg.mu2.buyer$risk.1 <- as.numeric(reg.mu2.buyer$player.risk1)
+reg.mu2.buyer$risk.2 <- as.numeric(reg.mu2.buyer$player.risk2)
+reg.mu2.buyer$trust.1 <- as.numeric(reg.mu2.buyer$player.trust.index)
+reg.mu2.buyer$trust.2 <- as.factor(as.numeric(reg.mu2.buyer$player.trust_strangers) - 1)
+reg.mu2.buyer$female <- as.factor(ifelse(reg.mu2.buyer$player.gender == "Female", 1, 0))
+reg.mu2.buyer$econ <- as.factor(reg.mu2.buyer$econ)
+
+reg.mu2.buyer <- reg.mu2.buyer[order(reg.mu2.buyer$subject.id, reg.mu2.buyer$period),]
+
+proposal.reg3 <- lmer(ypct ~ bid.low + product.quality + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + order + 
+                        (1|subject.id) + (1|cohort.number), data = reg.mu2.buyer)
+
+stargazer::stargazer(proposal.reg1,proposal.reg2,proposal.reg3, type="text",
+                     column.labels=c("Voluntary","Arb 1/3","Arb 2/3"), 
+                     dep.var.labels = c("Price proposal / surplus"), keep.stat=c("n","ll"),
+                     keep=c("bid.low","product.quality","period","order","risk.1","risk.2","Constant"), align = TRUE, digits = 3, 
+                     out="DataAnalysis/buyer_reg.txt")
+
+# Text to column fixed width into Excel then into Word
+## Custom format SD cells in Excel #,##0.000;(#,##0.000)
