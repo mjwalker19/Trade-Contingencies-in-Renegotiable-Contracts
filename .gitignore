@@ -6,5 +6,6 @@
 .Ruserdata
 Data/**
 DataAnalysis/Archive/**
+DataAnalysis/Stata/**
 TheoryAnalysis/**
 DataSetup/**

@@ -115,8 +115,6 @@ summary(subset(all.data$total.earnings, (all.data$role == "Seller" & all.data$tr
 ### Aggregate Findings ###
 ##################################
 
-# For the main treatments, Voluntary and Arbitrator, we have data from xx seller bidding decisions and xx matching groups
-
   ## Auctions
 
 auction.data.BS <- subset(Voluntary, role == "Seller" & lost.auction.data == 0)
@@ -575,10 +573,10 @@ wilcox.test(Cohort.Main$strategy.quality~Cohort.Main$treatment, alternative = c(
 tapply(Cohort.Main$strategy.quality, Cohort.Main$treatment, summary)
 
   wilcox.test(Cohort.Main.mu1$strategy.quality~Cohort.Main.mu1$sub, alternative = c("less")) 
-  tapply(Cohort.Main.mu1$strategy.quality, Cohort.Main$sub, summary)
+  tapply(Cohort.Main.mu1$strategy.quality, Cohort.Main.mu1$sub, summary)
   
   wilcox.test(Cohort.Main.mu2$strategy.quality~Cohort.Main.mu2$sub, alternative = c("less")) 
-  tapply(Cohort.Main.mu2$strategy.quality, Cohort.Main$sub, summary)
+  tapply(Cohort.Main.mu2$strategy.quality, Cohort.Main.mu2$sub, summary)
 
 wilcox.test(Cohort.Main$product.quality~Cohort.Main$treatment, alternative = c("less")) 
 tapply(Cohort.Main$product.quality, Cohort.Main$treatment, summary)
@@ -591,14 +589,14 @@ tapply(Cohort.Main$product.quality, Cohort.Main$treatment, summary)
 
   #' And efficiency to account for arbitration cost
 
-wilcox.test(Cohort.Main$efficiency~Cohort.Main$treatment, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main$efficiency~Cohort.Main$treatment, alternative = c("less")) 
 tapply(Cohort.Main$efficiency, Cohort.Main$treatment, summary)
 
   wilcox.test(Cohort.Main.mu1$efficiency~Cohort.Main.mu1$sub, alternative = c("less")) 
-  tapply(Cohort.Main.mu1$efficiency, Cohort.Main$sub, summary)
+  tapply(Cohort.Main.mu1$efficiency, Cohort.Main.mu1$sub, summary)
   
   wilcox.test(Cohort.Main.mu2$efficiency~Cohort.Main.mu2$sub, alternative = c("less")) 
-  tapply(Cohort.Main.mu2$efficiency, Cohort.Main$sub, summary)
+  tapply(Cohort.Main.mu2$efficiency, Cohort.Main.mu2$sub, summary)
 
 #### Hypothesis: In both Voluntary and Arbitrator, the buyer proposes the lower bound contract price; 
 #' the final trading price is greater in Arbitrator than in Voluntary.
@@ -731,10 +729,10 @@ wilcox.test(df$proposal.ratio.high, mu = 0.25, alternative = "greater")
 wilcox.test(Cohort.Sub$ypct~Cohort.Sub$sub, alternative = c("less"), paired = TRUE) 
 tapply(Cohort.Sub$ypct, Cohort.Sub$sub, summary)
 
-wilcox.test(Cohort.Sub$ypct.low~Cohort.Sub$sub, alternative = c("two.sided"), paired = TRUE) 
+wilcox.test(Cohort.Sub$ypct.low~Cohort.Sub$sub, alternative = c("less"), paired = TRUE) 
 tapply(Cohort.Sub$ypct.low, Cohort.Sub$sub, summary)
 
-wilcox.test(Cohort.Sub$ypct.high~Cohort.Sub$sub, alternative = c("two.sided"), paired = TRUE) 
+wilcox.test(Cohort.Sub$ypct.high~Cohort.Sub$sub, alternative = c("less"), paired = TRUE) 
 tapply(Cohort.Sub$ypct.high, Cohort.Sub$sub, summary)
 
   # Rel. freq arbitration
@@ -842,16 +840,16 @@ tapply(Cohort.Sub$group.buyer_payoff, Cohort.Sub$sub, summary)
 
   # Seller
 
-wilcox.test(Cohort.Main$group.seller_payoff~Cohort.Main$treatment, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main$group.seller_payoff~Cohort.Main$treatment, alternative = c("less")) 
 tapply(Cohort.Main$group.seller_payoff, Cohort.Main$treatment, summary)
 
-wilcox.test(Cohort.Main.mu1$group.seller_payoff~Cohort.Main.mu1$sub, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main.mu1$group.seller_payoff~Cohort.Main.mu1$sub, alternative = c("less")) 
 tapply(Cohort.Main.mu1$group.seller_payoff, Cohort.Main.mu1$sub, summary)
 
-wilcox.test(Cohort.Main.mu2$group.seller_payoff~Cohort.Main.mu2$sub, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main.mu2$group.seller_payoff~Cohort.Main.mu2$sub, alternative = c("less")) 
 tapply(Cohort.Main.mu2$group.seller_payoff, Cohort.Main.mu2$sub, summary)
 
-wilcox.test(Cohort.Sub$group.seller_payoff~Cohort.Sub$sub, alternative = c("two.sided"), paired=TRUE) 
+wilcox.test(Cohort.Sub$group.seller_payoff~Cohort.Sub$sub, alternative = c("less"), paired=TRUE) 
 tapply(Cohort.Sub$group.seller_payoff, Cohort.Sub$sub, summary)
 
 # Comparative by quality between main versus sub-treatments / within sub-treatments
@@ -890,7 +888,7 @@ tapply(Cohort.Main.mu1$seller_payoff.low, Cohort.Main.mu1$sub, summary)
 wilcox.test(Cohort.Main.mu2$seller_payoff.low~Cohort.Main.mu2$sub, alternative = c("two.sided")) 
 tapply(Cohort.Main.mu2$seller_payoff.low, Cohort.Main.mu2$sub, summary)
 
-wilcox.test(Cohort.Sub$seller_payoff.low~Cohort.Sub$sub, alternative = c("two.sided"), paired=TRUE) 
+wilcox.test(Cohort.Sub$seller_payoff.low~Cohort.Sub$sub, alternative = c("less"), paired=TRUE) 
 tapply(Cohort.Sub$seller_payoff.low, Cohort.Sub$sub, summary)
 
     # High quality
@@ -914,8 +912,8 @@ p.values <- length (1000)     # Empty object to collect p-values
 
 for (i in 1 : 1000) {
   
-  vol.resample <- sample(subset(Cohort.Main$product.quality, Cohort.Main$treatment == "Voluntary"), 18, replace = TRUE)
-  arb.resample <- sample(subset(Cohort.Main$product.quality, Cohort.Main$treatment == "Arbitrator"), 18, replace = TRUE)
+  vol.resample <- sample(subset(Cohort.Main$product.quality, Cohort.Main$treatment == "Voluntary"), 24, replace = TRUE)
+  arb.resample <- sample(subset(Cohort.Main$product.quality, Cohort.Main$treatment == "Arbitrator"), 24, replace = TRUE)
   p.values[i] <- wilcox.test(vol.resample, arb.resample, alternative = c("less"))$p.value
    
 }
@@ -926,9 +924,33 @@ p.values <- length (1000)     # Empty object to collect p-values
 
 for (i in 1 : 1000) {
   
-  vol.resample <- sample(subset(Cohort.Main$efficiency, Cohort.Main$treatment == "Voluntary"), 18, replace = TRUE)
-  arb.resample <- sample(subset(Cohort.Main$efficiency, Cohort.Main$treatment == "Arbitrator"), 18, replace = TRUE)
+  vol.resample <- sample(subset(Cohort.Main$efficiency, Cohort.Main$treatment == "Voluntary"), 24, replace = TRUE)
+  arb.resample <- sample(subset(Cohort.Main$efficiency, Cohort.Main$treatment == "Arbitrator"), 24, replace = TRUE)
   p.values[i] <- wilcox.test(vol.resample, arb.resample, alternative = c("less"))$p.value
+  
+}
+
+summary(p.values)
+
+p.values <- length (1000)     # Empty object to collect p-values
+
+for (i in 1 : 1000) {
+  
+  vol.resample <- sample(subset(Cohort.Main.mu2$group.seller_payoff, Cohort.Main.mu2$sub == "0"), 24, replace = TRUE)
+  arb.resample <- sample(subset(Cohort.Main.mu2$group.seller_payoff, Cohort.Main.mu2$sub == "mu2"), 24, replace = TRUE)
+  p.values[i] <- wilcox.test(vol.resample, arb.resample, alternative = c("less"))$p.value
+  
+}
+
+summary(p.values)
+
+p.values <- length (1000)     # Empty object to collect p-values
+
+for (i in 1 : 1000) {
+  
+  vol.resample <- sample(subset(Cohort.Sub$group.seller_payoff, Cohort.Sub$sub == "mu1"), 24, replace = TRUE)
+  arb.resample <- sample(subset(Cohort.Sub$group.seller_payoff, Cohort.Sub$sub == "mu2"), 24, replace = TRUE)
+  p.values[i] <- wilcox.test(vol.resample, arb.resample, alternative = c("less"), paired=TRUE)$p.value
   
 }
 
@@ -973,7 +995,8 @@ linearHypothesis(validation.2, "submu1 = submu2")
 # By default, pchisq() gives the proportion of the distribution to the left of the value. 
 # To get the proportion more extreme than your difference, you can specify lower.tail = FALSE 
 # or subtract the result from 1
-pchisq(1354.12 - 1343.998, 979 - 976, lower.tail = FALSE)
+pchisq(1478.8 - 1469.7, 1069 - 1066, lower.tail = FALSE)
+
 # Alternatively
 logit2 <- glm(data = matching.data, formula=product.quality ~ sub + period, family="binomial") 
 logit2
@@ -1007,7 +1030,7 @@ ols.5 <- lm( data = matching.data, formula=group.seller_payoff ~ sub + period)
 summary(ols.5)
 
 ##################################
-### Seller strategies ###
+### Seller bidding strategies ###
 ##################################
 
 ### Regression Analysis ###
@@ -1073,6 +1096,7 @@ reg.mu1.seller <-
 
 bid.reg2 <- lmer(bid ~ lag.bid + lag.comp.bid + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + order + 
                    (1|subject.id) + (1|cohort.number), data = reg.mu1.seller)
+summary(bid.reg2)
 
 reg.mu2.seller$risk.1 <- as.numeric(reg.mu2.seller$player.risk1)
 reg.mu2.seller$risk.2 <- as.numeric(reg.mu2.seller$player.risk2)
@@ -1112,7 +1136,8 @@ stargazer::stargazer(bid.reg1,bid.reg2,bid.reg3,quality.reg1,quality.reg2,qualit
                      column.labels=c("Voluntary","Arb 1/3","Arb 2/3","Voluntary","Arb 1/3","Arb 2/3"), 
                      dep.var.labels = c("Bid", "Quality"), keep.stat=c("n","ll"),
                      keep=c("bid","lag.bid","lag.comp.bid","period","order","risk.1","risk.2","Constant"), align = TRUE, digits = 3, 
-                     out="DataAnalysis/seller_reg.txt")
+                     out="DataAnalysis/seller_reg.txt",
+                     star.cutoffs = c(.05, .01, 0.001))
 
 # Text to column fixed width into Excel then into Word
 ## Custom format SD cells in Excel #,##0.000;(#,##0.000)
@@ -1195,7 +1220,7 @@ tapply(seller.strategy.arb$IC, seller.strategy.arb$sub, summary)
 tapply(seller.strategy.arb$IR, seller.strategy.arb$sub, summary)
 
 # Number of rational and incentive compatible strategies per individual seller.
-# Observation per seller - mu - based on 30 sellers
+# Observation per seller - mu - based on 36 sellers
 
 agg.seller.strategy.arb <- aggregate(seller.strategy.arb[c("IC", "IR", "count")], by=list(seller.strategy.arb$sub, seller.strategy.arb$subject.id),
                                            FUN=sum, na.rm=TRUE)
@@ -1520,7 +1545,71 @@ p
 dev.off()
 
 ##################################
-### Buyer strategies ###
+### Appendix: Buyer regression analysis ###
+##################################
+
+# Multi-level modelling of decision variables #
+
+library(arm) # for multi-level modelling - do not load for sim in next part
+
+# Buyer price proposals / surplus (mixed effects linear regression) 
+
+reg.vol.buyer <- subset(Voluntary, role == "Buyer")
+reg.mu1.buyer<- subset(Arbitrator, role == "Buyer" & sub == "mu1")
+reg.mu2.buyer<- subset(Arbitrator, role == "Buyer" & sub == "mu2")
+
+reg.vol.buyer$risk.1 <- as.numeric(reg.vol.buyer$player.risk1)
+reg.vol.buyer$risk.2 <- as.numeric(reg.vol.buyer$player.risk2)
+reg.vol.buyer$trust.1 <- as.numeric(reg.vol.buyer$player.trust.index)
+reg.vol.buyer$trust.2 <- as.factor(as.numeric(reg.vol.buyer$player.trust_strangers) - 1)
+reg.vol.buyer$female <- as.factor(ifelse(reg.vol.buyer$player.gender == "Female", 1, 0))
+reg.vol.buyer$econ <- as.factor(reg.vol.buyer$econ)
+
+reg.vol.buyer <- reg.vol.buyer[order(reg.vol.buyer$subject.id, reg.vol.buyer$period),]
+
+proposal.reg1 <- lmer(y ~ floor + product.quality + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + 
+                        (1|subject.id), data = reg.vol.buyer)
+summary(proposal.reg1)
+
+reg.mu1.buyer$risk.1 <- as.numeric(reg.mu1.buyer$player.risk1)
+reg.mu1.buyer$risk.2 <- as.numeric(reg.mu1.buyer$player.risk2)
+reg.mu1.buyer$trust.1 <- as.numeric(reg.mu1.buyer$player.trust.index)
+reg.mu1.buyer$trust.2 <- as.factor(as.numeric(reg.mu1.buyer$player.trust_strangers) - 1)
+reg.mu1.buyer$female <- as.factor(ifelse(reg.mu1.buyer$player.gender == "Female", 1, 0))
+reg.mu1.buyer$econ <- as.factor(reg.mu1.buyer$econ)
+
+reg.mu1.buyer <- reg.mu1.buyer[order(reg.mu1.buyer$subject.id, reg.mu1.buyer$period),]
+
+proposal.reg2 <- lmer(y ~ floor + product.quality + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + order + 
+                        (1|subject.id), data = reg.mu1.buyer)
+summary(proposal.reg2)
+
+reg.mu2.buyer$risk.1 <- as.numeric(reg.mu2.buyer$player.risk1)
+reg.mu2.buyer$risk.2 <- as.numeric(reg.mu2.buyer$player.risk2)
+reg.mu2.buyer$trust.1 <- as.numeric(reg.mu2.buyer$player.trust.index)
+reg.mu2.buyer$trust.2 <- as.factor(as.numeric(reg.mu2.buyer$player.trust_strangers) - 1)
+reg.mu2.buyer$female <- as.factor(ifelse(reg.mu2.buyer$player.gender == "Female", 1, 0))
+reg.mu2.buyer$econ <- as.factor(reg.mu2.buyer$econ)
+
+reg.mu2.buyer <- reg.mu2.buyer[order(reg.mu2.buyer$subject.id, reg.mu2.buyer$period),]
+
+proposal.reg3 <- lmer(y ~ floor + product.quality + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + order + 
+                        (1|subject.id), data = reg.mu2.buyer)
+summary(proposal.reg3)
+
+stargazer::stargazer(proposal.reg1,proposal.reg2,proposal.reg3, type="text",
+                     column.labels=c("Voluntary","Arb 1/3","Arb 2/3"), 
+                     dep.var.labels = c("Price proposal"), keep.stat=c("n","ll"),
+                     keep=c("floor","product.quality", "period","order","Constant"), align = TRUE, digits = 3, 
+                     out="DataAnalysis/buyer_reg.txt",
+                     star.cutoffs = c(.05, .01, 0.001))
+
+# Text to column fixed width into Excel then into Word
+## Custom format SD cells in Excel #,##0.000;(#,##0.000)
+
+
+##################################
+### Reference-dependent buyers ###
 ##################################
 
 ### Strategy classification ###
@@ -1529,84 +1618,60 @@ buyer.strategy.arb <- subset(Arbitrator, role == "Buyer")
 
 buyer.strategy.vol <- subset(Voluntary, role == "Buyer")
 
-# Individual strategy choices.
+  # Arbitrator
 
-  # Overall
+buyer.strategy.arb <- mutate(buyer.strategy.arb, pA.int = ifelse(sub == "mu2", 
+                                                                 pmax(pmin(bid.low, par.mu2*(subsession.value_low+product.quality*(subsession.value_high - subsession.value_low)) + (1-par.mu2)*(subsession.cost_low+product.quality*(subsession.cost_high - subsession.cost_low))), floor), 
+                                                                 pmax(pmin(bid.low, par.mu1*(subsession.value_low+product.quality*(subsession.value_high - subsession.value_low)) + (1-par.mu1)*(subsession.cost_low+product.quality*(subsession.cost_high - subsession.cost_low))), floor)))
 
 buyer.strategy.arb <- mutate(buyer.strategy.arb, pA.alt = ifelse(sub == "mu1", 
-                                                                 pmin(bid.low, par.mu2*(subsession.value_low+product.quality*(subsession.value_high - subsession.value_low)) + (1-par.mu2)*(subsession.cost_low+product.quality*(subsession.cost_high - subsession.cost_low))), 
-                                                                 pmin(bid.low, par.mu1*(subsession.value_low+product.quality*(subsession.value_high - subsession.value_low)) + (1-par.mu1)*(subsession.cost_low+product.quality*(subsession.cost_high - subsession.cost_low)))))
+                                                                 pmax(pmin(bid.low, par.mu2*(subsession.value_low+product.quality*(subsession.value_high - subsession.value_low)) + (1-par.mu2)*(subsession.cost_low+product.quality*(subsession.cost_high - subsession.cost_low))), floor), 
+                                                                 pmax(pmin(bid.low, par.mu1*(subsession.value_low+product.quality*(subsession.value_high - subsession.value_low)) + (1-par.mu1)*(subsession.cost_low+product.quality*(subsession.cost_high - subsession.cost_low))), floor)))
 
-buyer.strategy.arb <- mutate(buyer.strategy.arb, lower = ifelse(y <= floor + 1, 1, ifelse(is.na(y), NA, 0)), mimic = ifelse(y >= pA - 1 & y <= pA + 1, 1, ifelse(is.na(y), NA, 0)), count = ifelse(!is.na(y), 1, NA), mimic.pseudo = ifelse(y >= pA.alt - 1 & y <= pA.alt + 1, 1, ifelse(is.na(y), NA, 0)))
+buyer.strategy.arb <- mutate(buyer.strategy.arb, lower = ifelse(y == floor, 1, ifelse(is.na(y), NA, 0)), mimic.int = ifelse(y >= pA.int - 2 & y <= pA.int + 2, 1, ifelse(is.na(y), NA, 0)), count = ifelse(!is.na(y), 1, NA), mimic.alt = ifelse(y >= pA.alt - 2 & y <= pA.alt + 2, 1, ifelse(is.na(y), NA, 0)))
 
-buyer.strategy.arb <- mutate(buyer.strategy.arb, above = ifelse(y > pA + 1, 1, ifelse(is.na(y), NA, 0)), between = ifelse(y >= floor + 1 & y <= pA - 1, 1, ifelse(is.na(y), NA, 0)))
+buyer.strategy.arb <- mutate(buyer.strategy.arb, above = ifelse(y > pA.int + 2, 1, ifelse(is.na(y), NA, 0)), between = ifelse(y > floor & y <= pA.int - 2, 1, ifelse(is.na(y), NA, 0)))
 
 summary(buyer.strategy.arb$lower)
-summary(buyer.strategy.arb$mimic)
-summary(buyer.strategy.arb$mimic.pseudo)
-summary(buyer.strategy.arb$above)
-summary(buyer.strategy.arb$between)
 tapply(buyer.strategy.arb$lower, buyer.strategy.arb$sub, summary)
-tapply(buyer.strategy.arb$mimic, buyer.strategy.arb$sub, summary)
-tapply(buyer.strategy.arb$mimic.pseudo, buyer.strategy.arb$sub, summary)
+tapply(subset(buyer.strategy.arb$lower, buyer.strategy.arb$product.quality == 0), subset(buyer.strategy.arb$sub, buyer.strategy.arb$product.quality == 0), summary)
+tapply(subset(buyer.strategy.arb$lower, buyer.strategy.arb$product.quality == 1), subset(buyer.strategy.arb$sub, buyer.strategy.arb$product.quality == 1), summary)
+
+summary(buyer.strategy.arb$mimic.int)
+tapply(buyer.strategy.arb$mimic.int, buyer.strategy.arb$sub, summary)
+tapply(subset(buyer.strategy.arb$mimic.int, buyer.strategy.arb$product.quality == 0), subset(buyer.strategy.arb$sub, buyer.strategy.arb$product.quality == 0), summary)
+tapply(subset(buyer.strategy.arb$mimic.int, buyer.strategy.arb$product.quality == 1), subset(buyer.strategy.arb$sub, buyer.strategy.arb$product.quality == 1), summary)
+
+summary(buyer.strategy.arb$mimic.alt)
+tapply(buyer.strategy.arb$mimic.alt, buyer.strategy.arb$sub, summary)
+
+summary(buyer.strategy.arb$above)
 tapply(buyer.strategy.arb$above, buyer.strategy.arb$sub, summary)
+
+summary(buyer.strategy.arb$between)
 tapply(buyer.strategy.arb$between, buyer.strategy.arb$sub, summary)
 
+buyer.strategy.arb <- buyer.strategy.arb[,c(1:8, 20, 22:26, 82:89)]
 
-buyer.strategy.vol <- mutate(buyer.strategy.vol, 
-                             pA.mu1 = pmin(bid.low, par.mu1*(subsession.value_low+product.quality*(subsession.value_high - subsession.value_low)) + (1-par.mu1)*(subsession.cost_low+product.quality*(subsession.cost_high - subsession.cost_low))), 
-                             pA.mu2 = pmin(bid.low, par.mu2*(subsession.value_low+product.quality*(subsession.value_high - subsession.value_low)) + (1-par.mu2)*(subsession.cost_low+product.quality*(subsession.cost_high - subsession.cost_low)))) 
+  # Voluntary
 
-buyer.strategy.vol <- mutate(buyer.strategy.vol, lower = ifelse(y <= floor + 1, 1, ifelse(is.na(y), NA, 0)), mimic.1 = ifelse(y >= pA.mu1 - 1 & y <= pA.mu1 + 1, 1, ifelse(is.na(y), NA, 0)), count = ifelse(!is.na(y), 1, NA), mimic.2 = ifelse(y >= pA.mu2 - 1 & y <= pA.mu2 + 1, 1, ifelse(is.na(y), NA, 0)))
+buyer.strategy.vol <- mutate(buyer.strategy.vol, lower = ifelse(y == floor, 1, ifelse(is.na(y), NA, 0)), count = ifelse(!is.na(y), 1, NA))
                                                                  
 summary(buyer.strategy.vol$lower)
-summary(buyer.strategy.vol$mimic.1)
-summary(buyer.strategy.vol$mimic.2)
+summary(subset(buyer.strategy.vol$lower, buyer.strategy.vol$product.quality == 0))
+summary(subset(buyer.strategy.vol$lower, buyer.strategy.vol$product.quality == 1))
 
-  # By quality
-
-buyer.strategy.arb <- mutate(buyer.strategy.arb,
-                   y.high = ifelse(product.quality == 1, y, NA),
-                   y.low = ifelse(product.quality == 0, y, NA))
-
-buyer.strategy.arb <- mutate(buyer.strategy.arb, lower.low = ifelse(y.low <= floor + 1, 1, ifelse(is.na(y.low), NA, 0)), mimic.low = ifelse(y.low >= pA - 1 & y.low <= pA + 1, 1, ifelse(is.na(y.low), NA, 0)), count = ifelse(!is.na(y.low), 1, NA))
-buyer.strategy.arb <- mutate(buyer.strategy.arb, lower.high = ifelse(y.high <= floor + 1, 1, ifelse(is.na(y.high), NA, 0)), mimic.high = ifelse(y.high >= pA - 1 & y.high <= pA + 1, 1, ifelse(is.na(y.high), NA, 0)), count = ifelse(!is.na(y.high), 1, NA))
-
-summary(buyer.strategy.arb$lower.low)
-summary(buyer.strategy.arb$mimic.low)
-tapply(buyer.strategy.arb$lower.low, buyer.strategy.arb$sub, summary)
-tapply(buyer.strategy.arb$mimic.low, buyer.strategy.arb$sub, summary)
-
-summary(buyer.strategy.arb$lower.high)
-summary(buyer.strategy.arb$mimic.high)
-tapply(buyer.strategy.arb$lower.high, buyer.strategy.arb$sub, summary)
-tapply(buyer.strategy.arb$mimic.high, buyer.strategy.arb$sub, summary)
-
-buyer.strategy.vol <- mutate(buyer.strategy.vol,
-                             y.high = ifelse(product.quality == 1, y, NA),
-                             y.low = ifelse(product.quality == 0, y, NA))
-
-buyer.strategy.vol <- mutate(buyer.strategy.vol, lower.low = ifelse(y.low <= floor + 1, 1, ifelse(is.na(y.low), NA, 0)), count = ifelse(!is.na(y.low), 1, NA))
-buyer.strategy.vol <- mutate(buyer.strategy.vol, lower.high = ifelse(y.high <= floor + 1, 1, ifelse(is.na(y.high), NA, 0)), count = ifelse(!is.na(y.low), 1, NA))
-
-summary(buyer.strategy.vol$lower.low)
-summary(buyer.strategy.vol$lower.high)
+buyer.strategy.vol <- buyer.strategy.vol[,c(1:8, 20, 22:26, 82:83)]
 
 # Lower bound and mimicking choices per individual buyer in Arbitrator.
 # Observation per buyer - mu
 
-buyer.strategy.arb <- mutate(buyer.strategy.arb, count = ifelse(!is.na(y), 1, NA))
-# reset the count to aggregate level
-
-buyer.strategy.vol <- mutate(buyer.strategy.vol, count = ifelse(!is.na(y), 1, NA))
-# reset the count to aggregate level
-
-agg.buyer.strategy.arb <- aggregate(buyer.strategy.arb[c("lower", "mimic", "count")], by=list(buyer.strategy.arb$sub, buyer.strategy.arb$subject.id),
+agg.buyer.strategy.arb <- aggregate(buyer.strategy.arb[c("lower", "mimic.int", "count")], by=list(buyer.strategy.arb$sub, buyer.strategy.arb$subject.id),
                                      FUN=sum, na.rm=TRUE)
 
 agg.buyer.strategy.arb <- rename(agg.buyer.strategy.arb, c("Group.1"="sub", "Group.2"="subject.id"))
 
-agg.buyer.strategy.arb <- mutate(agg.buyer.strategy.arb, prop.lower = lower/count, prop.mimic = mimic/count)
+agg.buyer.strategy.arb <- mutate(agg.buyer.strategy.arb, prop.lower = lower/count, prop.mimic = mimic.int/count)
 
 agg.buyer.strategy.arb$sub <- factor(agg.buyer.strategy.arb$sub)
 
@@ -1616,17 +1681,16 @@ tapply(agg.buyer.strategy.arb$prop.mimic, agg.buyer.strategy.arb$sub, summary)
 dupe.vector <- duplicated(agg.buyer.strategy.arb[,c(1,3,4)]) 
 
 agg.buyer.strategy.arb$dupe <- dupe.vector
-# check no. duplicate rows within mu for below scaling based on actual number IR/IC choices out of (max) 15
 # sort by mimic - lower - mu then for each consecutive TRUE have 1 dupe
 
 png(filename = "DataAnalysis/buyer.strategy.png",height=800,width=800)  
 
 p <- ggplot(
   agg.buyer.strategy.arb, 
-  aes(x = lower, y=mimic)
+  aes(x = lower, y=mimic.int)
 ) +
   geom_count(show.legend = FALSE, shape=1) +
-  scale_size(range = c(4, 12)) + # adjust based on no. buyers with same coordinate [current max = 3x]
+  scale_size(range = c(3, 12)) + # adjust based on no. buyers with same coordinate [current max = 3x]
   facet_wrap(sub~., nrow=2, labeller = labeller(sub = labs1))+
   scale_x_continuous(limits=c(0,15))+
   scale_y_continuous(limits=c(0,15))+
@@ -1672,17 +1736,17 @@ summary(cohort.buyer.strategy.vol$prop.lower)
 
   # Arbitrator
 
-# 15 observations per cohort - mu
+# 18 observations per cohort - mu
 
 buyer.strategy.arb <- mutate(buyer.strategy.arb, 
                               time = ifelse((order=="12"&sub=="mu1")|(order=="21"&sub=="mu2"), period, period-15))
 
-cohort.buyer.strategy.arb <- aggregate(buyer.strategy.arb[c("lower", "mimic", "count")], by=list(buyer.strategy.arb$sub, buyer.strategy.arb$cohort.number, buyer.strategy.arb$time),
+cohort.buyer.strategy.arb <- aggregate(buyer.strategy.arb[c("lower", "mimic.int", "count")], by=list(buyer.strategy.arb$sub, buyer.strategy.arb$cohort.number, buyer.strategy.arb$time),
                                         FUN=sum, na.rm=TRUE)
 
 cohort.buyer.strategy.arb <- rename(cohort.buyer.strategy.arb, c("Group.1"="sub", "Group.2"="cohort.number", "Group.3"="time"))
 
-cohort.buyer.strategy.arb <- mutate(cohort.buyer.strategy.arb, prop.lower = lower/count, prop.mimic = mimic/count)
+cohort.buyer.strategy.arb <- mutate(cohort.buyer.strategy.arb, prop.lower = lower/count, prop.mimic = mimic.int/count)
 
 cohort.buyer.strategy.arb$sub <- factor(cohort.buyer.strategy.arb$sub)
 cohort.buyer.strategy.arb$Period <- as.factor(cohort.buyer.strategy.arb$time)
@@ -1700,14 +1764,14 @@ png(filename = "DataAnalysis/cohort.time.buyer.type.png",height=1000,width=2000)
 
 p <- ggplot(
   cohort.buyer.strategy.arb, 
-  aes(x = lower, y=mimic)
+  aes(x = lower, y=mimic.int)
 ) +
   geom_count(show.legend = FALSE, shape=19) +
   scale_size(range = c(3, 9)) + # adjust based on no. cohorts with same coordinate in a period [current max = 3x]
   facet_grid(sub~Period, labeller = labeller(sub = labs1))+
   scale_x_continuous(limits=c(0,6))+
   scale_y_continuous(limits=c(0,6))+
-  labs(x = "\n Number of lower bound choices", y = "Number of mimicking choices \n")+
+  labs(x = "\n Number of lower bound strategies", y = "Number of mimicking strategies \n")+
   theme_bw() +
   theme(
     strip.text.x = element_text(size = 18),
@@ -1736,14 +1800,14 @@ cohort.buyer.strategy.arb$time <- as.integer(cohort.buyer.strategy.arb$time)
 
 p <- ggplot(
   cohort.buyer.strategy.arb, 
-  aes(x = lower, y=mimic)
+  aes(x = lower, y=mimic.int)
 ) +
   geom_count(show.legend = FALSE, shape=19) +
   scale_size(range = c(3, 9)) + # adjust as per above
   facet_wrap(sub~., labeller = labeller(sub = labs1))+
   scale_x_continuous(limits=c(0,6))+
   scale_y_continuous(limits=c(0,6))+
-  labs(x = "\n Number of lower bound choices", y = "Number of mimicking choices \n")+
+  labs(x = "\n Number of lower bound strategies", y = "Number of mimicking strategies \n")+
   theme_bw() +
   theme(
     strip.text.x = element_text(size = 18),
@@ -1769,7 +1833,7 @@ anim <- p + transition_time(time) +
 
 anim_save("DataAnalysis/cohort.time.buyer.type.gif", anim, height=800,width=1200)
 
-# Non-parametric Spearman test: R=number of time the series is/are resampled for a bootstrap test
+# Non-parametric Spearman tests: R=number of time the series is/are resampled for a bootstrap test
 
   # Voluntary
   
@@ -1782,7 +1846,7 @@ test$p.value
 
   # Arbitrator
 
-ts.cohort.buyer.strategy.arb <- aggregate(cohort.buyer.strategy.arb[c("lower", "mimic")], by=list(cohort.buyer.strategy.arb$sub, cohort.buyer.strategy.arb$time),
+ts.cohort.buyer.strategy.arb <- aggregate(cohort.buyer.strategy.arb[c("lower", "mimic.int")], by=list(cohort.buyer.strategy.arb$sub, cohort.buyer.strategy.arb$time),
                                            FUN=mean, na.rm=TRUE)
 
 ts.mu1.lower <- ts(subset(ts.cohort.buyer.strategy.arb$lower, ts.cohort.buyer.strategy.arb$Group.1 == "mu1"))
@@ -1795,12 +1859,12 @@ test <- trend.test(ts.mu2.lower, R=999)
 test
 test$p.value
 
-ts.mu1.mimic <- ts(subset(ts.cohort.buyer.strategy.arb$mimic, ts.cohort.buyer.strategy.arb$Group.1 == "mu1"))
+ts.mu1.mimic <- ts(subset(ts.cohort.buyer.strategy.arb$mimic.int, ts.cohort.buyer.strategy.arb$Group.1 == "mu1"))
 test <- trend.test(ts.mu1.mimic, R=999)
 test
 test$p.value
 
-ts.mu2.mimic <- ts(subset(ts.cohort.buyer.strategy.arb$mimic, ts.cohort.buyer.strategy.arb$Group.1 == "mu2"))
+ts.mu2.mimic <- ts(subset(ts.cohort.buyer.strategy.arb$mimic.int, ts.cohort.buyer.strategy.arb$Group.1 == "mu2"))
 test <- trend.test(ts.mu2.mimic, R=999)
 test
 test$p.value
@@ -1882,59 +1946,9 @@ p
 
 dev.off()
 
-### Archived Regression Analysis of buyer determinants ###
+### STATA export for mixture model estimation ###
 
-# Multi-level modelling of decision variables #
+library(foreign)
+write.dta(buyer.strategy.arb, "DataAnalysis/Stata/Data/buyer_arb_data.dta")
 
-library(arm) # for multi-level modelling - do not load for sim in next part
 
-# Buyer price proposals / surplus (mixed effects linear regression) 
-
-reg.vol.buyer <- subset(Voluntary, role == "Buyer")
-reg.mu1.buyer<- subset(Arbitrator, role == "Buyer" & sub == "mu1")
-reg.mu2.buyer<- subset(Arbitrator, role == "Buyer" & sub == "mu2")
-
-reg.vol.buyer$risk.1 <- as.numeric(reg.vol.buyer$player.risk1)
-reg.vol.buyer$risk.2 <- as.numeric(reg.vol.buyer$player.risk2)
-reg.vol.buyer$trust.1 <- as.numeric(reg.vol.buyer$player.trust.index)
-reg.vol.buyer$trust.2 <- as.factor(as.numeric(reg.vol.buyer$player.trust_strangers) - 1)
-reg.vol.buyer$female <- as.factor(ifelse(reg.vol.buyer$player.gender == "Female", 1, 0))
-reg.vol.buyer$econ <- as.factor(reg.vol.buyer$econ)
-
-reg.vol.buyer <- reg.vol.buyer[order(reg.vol.buyer$subject.id, reg.vol.buyer$period),]
-
-proposal.reg1 <- lmer(ypct ~ bid.low + product.quality + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + 
-                        (1|subject.id) + (1|cohort.number), data = reg.vol.buyer)
-
-reg.mu1.buyer$risk.1 <- as.numeric(reg.mu1.buyer$player.risk1)
-reg.mu1.buyer$risk.2 <- as.numeric(reg.mu1.buyer$player.risk2)
-reg.mu1.buyer$trust.1 <- as.numeric(reg.mu1.buyer$player.trust.index)
-reg.mu1.buyer$trust.2 <- as.factor(as.numeric(reg.mu1.buyer$player.trust_strangers) - 1)
-reg.mu1.buyer$female <- as.factor(ifelse(reg.mu1.buyer$player.gender == "Female", 1, 0))
-reg.mu1.buyer$econ <- as.factor(reg.mu1.buyer$econ)
-
-reg.mu1.buyer <- reg.mu1.buyer[order(reg.mu1.buyer$subject.id, reg.mu1.buyer$period),]
-
-proposal.reg2 <- lmer(ypct ~ bid.low + product.quality + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + order + 
-                        (1|subject.id) + (1|cohort.number), data = reg.mu1.buyer)
-
-reg.mu2.buyer$risk.1 <- as.numeric(reg.mu2.buyer$player.risk1)
-reg.mu2.buyer$risk.2 <- as.numeric(reg.mu2.buyer$player.risk2)
-reg.mu2.buyer$trust.1 <- as.numeric(reg.mu2.buyer$player.trust.index)
-reg.mu2.buyer$trust.2 <- as.factor(as.numeric(reg.mu2.buyer$player.trust_strangers) - 1)
-reg.mu2.buyer$female <- as.factor(ifelse(reg.mu2.buyer$player.gender == "Female", 1, 0))
-reg.mu2.buyer$econ <- as.factor(reg.mu2.buyer$econ)
-
-reg.mu2.buyer <- reg.mu2.buyer[order(reg.mu2.buyer$subject.id, reg.mu2.buyer$period),]
-
-proposal.reg3 <- lmer(ypct ~ bid.low + product.quality + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + order + 
-                        (1|subject.id) + (1|cohort.number), data = reg.mu2.buyer)
-
-stargazer::stargazer(proposal.reg1,proposal.reg2,proposal.reg3, type="text",
-                     column.labels=c("Voluntary","Arb 1/3","Arb 2/3"), 
-                     dep.var.labels = c("Price proposal / surplus"), keep.stat=c("n","ll"),
-                     keep=c("bid.low","product.quality","period","order","risk.1","risk.2","Constant"), align = TRUE, digits = 3, 
-                     out="DataAnalysis/buyer_reg.txt")
-
-# Text to column fixed width into Excel then into Word
-## Custom format SD cells in Excel #,##0.000;(#,##0.000)
