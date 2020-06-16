@@ -1,0 +1,45 @@
+> all.data <- readRDS("Data/DataForAnalysis.rds") 
+> 
+> all.data <- mutate(all.data, bid.low.qL = ifelse(product.quality == 0, bid.low, NA), 
++                    bid.low.qH = ifelse(product.quality == 1, bid.low, NA),
++                    bid.qL = ifelse(strategy.quality == 0, bid, NA),
++                    bid.qH = ifelse(strategy.quality == 1, bid, NA))
+> 
+> agg.bids.quality <- aggregate(all.data[c("bid.qL", "bid.qH")],
++                          by=list(all.data$treatment, all.data$cohort.number),
++                          FUN=mean, na.rm=TRUE)
+> 
+> agg.bids.quality <- rename(agg.bids.quality, c("Group.1"="treatment", "Group.2"="cohort.number"))
+> 
+> describeBy(agg.bids.quality[,c(3:4)], agg.bids.quality$treatment)
+
+ Descriptive statistics by group 
+group: Voluntary
+       vars n   mean    sd median trimmed   mad   min    max range  skew kurtosis   se
+bid.qL    1 6 115.41 21.40 118.35  115.41 18.02 80.12 139.24 59.12 -0.45    -1.45 8.74
+bid.qH    2 6 109.96 19.97 109.71  109.96 21.27 78.50 133.12 54.62 -0.27    -1.53 8.15
+--------------------------------------------------------------------------------------------- 
+group: Arbitrator
+       vars n  mean    sd median trimmed   mad   min    max range  skew kurtosis   se
+bid.qL    1 6 75.20 14.73  74.46   75.20 12.29 53.01  96.25 43.24 -0.06    -1.41 6.01
+bid.qH    2 6 81.95 14.78  81.86   81.95  2.36 59.11 105.66 46.55  0.07    -0.94 6.03
+> 
+> #' Comparison: One-tailed Wilcoxon Signed Rank test for paired sample comparison
+> df <- subset(agg.bids.quality, treatment == "Voluntary")
+> wilcox.test(df$bid.qL, df$bid.qH, alternative = c("two.sided"), paired = TRUE) 
+
+	Wilcoxon signed rank test
+
+data:  df$bid.qL and df$bid.qH
+V = 21, p-value = 0.03125
+alternative hypothesis: true location shift is not equal to 0
+
+> 
+> df <- subset(agg.bids.quality, treatment == "Arbitrator")
+> wilcox.test(df$bid.qL, df$bid.qH, alternative = c("two.sided"), paired = TRUE)
+
+	Wilcoxon signed rank test
+
+data:  df$bid.qL and df$bid.qH
+V = 1, p-value = 0.0625
+alternative hypothesis: true location shift is not equal to 0

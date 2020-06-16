@@ -1035,12 +1035,7 @@ summary(ols.5)
 
 ### Regression Analysis ###
 
-  # Multi-level modelling of decision variables #
-
-library(arm) # for multi-level modelling - do not load for sim in next part
-
-    # Seller bids (mixed effects linear regression) 
-    # Seller qua
+  # Stata Export [for multi-level modelling ] #
 
 reg.vol.seller<- subset(Voluntary, role == "Seller")
 reg.mu1.seller<- subset(Arbitrator, role == "Seller" & sub == "mu1")
@@ -1068,10 +1063,6 @@ reg.vol.seller <-
   mutate(lag.bid.high = ifelse(period == 1, NA, lag.bid.high)) %>%
   mutate(lag.comp.bid = ifelse(lag.winner, lag.bid.high, lag.bid.low))
 
-bid.reg1 <- lmer(bid ~ lag.bid + lag.comp.bid + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + 
-                   (1|subject.id) + (1|cohort.number), data = reg.vol.seller)
-summary(bid.reg1)
-
 reg.mu1.seller$risk.1 <- as.numeric(reg.mu1.seller$player.risk1)
 reg.mu1.seller$risk.2 <- as.numeric(reg.mu1.seller$player.risk2)
 reg.mu1.seller$trust.1 <- as.numeric(reg.mu1.seller$player.trust.index)
@@ -1093,10 +1084,6 @@ reg.mu1.seller <-
   mutate(lag.bid.high = dplyr::lag(bid.high, n = 1, default = NA)) %>%
   mutate(lag.bid.high = ifelse(period == 1, NA, lag.bid.high)) %>%
   mutate(lag.comp.bid = ifelse(lag.winner, lag.bid.high, lag.bid.low))
-
-bid.reg2 <- lmer(bid ~ lag.bid + lag.comp.bid + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + order + 
-                   (1|subject.id) + (1|cohort.number), data = reg.mu1.seller)
-summary(bid.reg2)
 
 reg.mu2.seller$risk.1 <- as.numeric(reg.mu2.seller$player.risk1)
 reg.mu2.seller$risk.2 <- as.numeric(reg.mu2.seller$player.risk2)
@@ -1120,27 +1107,10 @@ reg.mu2.seller <-
   mutate(lag.bid.high = ifelse(period == 1, NA, lag.bid.high)) %>%
   mutate(lag.comp.bid = ifelse(lag.winner, lag.bid.high, lag.bid.low))
 
-bid.reg3 <- lmer(bid ~ lag.bid + lag.comp.bid + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + order + 
-                   (1|subject.id) + (1|cohort.number), data = reg.mu2.seller)
+reg.stata.seller <- rbind(reg.vol.seller, reg.mu1.seller, reg.mu2.seller)
 
-quality.reg1 <- glmer(strategy.quality ~ bid + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period +
-                   (1|subject.id) + (1|cohort.number), data = reg.vol.seller, family = binomial)
-
-quality.reg2 <- glmer(strategy.quality ~ bid + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + order +
-                        (1|subject.id) + (1|cohort.number), data = reg.mu1.seller, family = binomial) 
-
-quality.reg3 <- glmer(strategy.quality ~ bid + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + order +
-                        (1|subject.id) + (1|cohort.number), data = reg.mu2.seller, family = binomial) 
-
-stargazer::stargazer(bid.reg1,bid.reg2,bid.reg3,quality.reg1,quality.reg2,quality.reg3, type="text",
-                     column.labels=c("Voluntary","Arb 1/3","Arb 2/3","Voluntary","Arb 1/3","Arb 2/3"), 
-                     dep.var.labels = c("Bid", "Quality"), keep.stat=c("n","ll"),
-                     keep=c("bid","lag.bid","lag.comp.bid","period","order","risk.1","risk.2","Constant"), align = TRUE, digits = 3, 
-                     out="DataAnalysis/seller_reg.txt",
-                     star.cutoffs = c(.05, .01, 0.001))
-
-# Text to column fixed width into Excel then into Word
-## Custom format SD cells in Excel #,##0.000;(#,##0.000)
+library(foreign)
+write.dta(reg.stata.seller, "DataAnalysis/Stata/Data/seller_reg_data.dta")
 
 ### Strategy classification ###
 
@@ -1548,11 +1518,7 @@ dev.off()
 ### Appendix: Buyer regression analysis ###
 ##################################
 
-# Multi-level modelling of decision variables #
-
-library(arm) # for multi-level modelling - do not load for sim in next part
-
-# Buyer price proposals / surplus (mixed effects linear regression) 
+# Stata Export [for multi-level modelling ] #
 
 reg.vol.buyer <- subset(Voluntary, role == "Buyer")
 reg.mu1.buyer<- subset(Arbitrator, role == "Buyer" & sub == "mu1")
@@ -1567,22 +1533,12 @@ reg.vol.buyer$econ <- as.factor(reg.vol.buyer$econ)
 
 reg.vol.buyer <- reg.vol.buyer[order(reg.vol.buyer$subject.id, reg.vol.buyer$period),]
 
-proposal.reg1 <- lmer(y ~ floor + product.quality + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + 
-                        (1|subject.id), data = reg.vol.buyer)
-summary(proposal.reg1)
-
 reg.mu1.buyer$risk.1 <- as.numeric(reg.mu1.buyer$player.risk1)
 reg.mu1.buyer$risk.2 <- as.numeric(reg.mu1.buyer$player.risk2)
 reg.mu1.buyer$trust.1 <- as.numeric(reg.mu1.buyer$player.trust.index)
 reg.mu1.buyer$trust.2 <- as.factor(as.numeric(reg.mu1.buyer$player.trust_strangers) - 1)
 reg.mu1.buyer$female <- as.factor(ifelse(reg.mu1.buyer$player.gender == "Female", 1, 0))
 reg.mu1.buyer$econ <- as.factor(reg.mu1.buyer$econ)
-
-reg.mu1.buyer <- reg.mu1.buyer[order(reg.mu1.buyer$subject.id, reg.mu1.buyer$period),]
-
-proposal.reg2 <- lmer(y ~ floor + product.quality + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + order + 
-                        (1|subject.id), data = reg.mu1.buyer)
-summary(proposal.reg2)
 
 reg.mu2.buyer$risk.1 <- as.numeric(reg.mu2.buyer$player.risk1)
 reg.mu2.buyer$risk.2 <- as.numeric(reg.mu2.buyer$player.risk2)
@@ -1593,20 +1549,10 @@ reg.mu2.buyer$econ <- as.factor(reg.mu2.buyer$econ)
 
 reg.mu2.buyer <- reg.mu2.buyer[order(reg.mu2.buyer$subject.id, reg.mu2.buyer$period),]
 
-proposal.reg3 <- lmer(y ~ floor + product.quality + risk.1 + risk.2 + trust.1 + trust.2 + female + econ + period + order + 
-                        (1|subject.id), data = reg.mu2.buyer)
-summary(proposal.reg3)
+reg.stata.buyer <- rbind(reg.vol.buyer, reg.mu1.buyer, reg.mu2.buyer)
 
-stargazer::stargazer(proposal.reg1,proposal.reg2,proposal.reg3, type="text",
-                     column.labels=c("Voluntary","Arb 1/3","Arb 2/3"), 
-                     dep.var.labels = c("Price proposal"), keep.stat=c("n","ll"),
-                     keep=c("floor","product.quality", "period","order","Constant"), align = TRUE, digits = 3, 
-                     out="DataAnalysis/buyer_reg.txt",
-                     star.cutoffs = c(.05, .01, 0.001))
-
-# Text to column fixed width into Excel then into Word
-## Custom format SD cells in Excel #,##0.000;(#,##0.000)
-
+library(foreign)
+write.dta(reg.stata.buyer, "DataAnalysis/Stata/Data/buyer_reg_data.dta")
 
 ##################################
 ### Reference-dependent buyers ###
