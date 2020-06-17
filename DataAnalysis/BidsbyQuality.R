@@ -1,6 +1,7 @@
 ## Load packages ##
 library(tidyverse)
 library(psych)
+library(plyr)
 
 ## Additional analysis of bids split by quality level
 
@@ -12,14 +13,34 @@ all.data <- mutate(all.data, bid.low.qL = ifelse(product.quality == 0, bid.low, 
                    bid.qH = ifelse(strategy.quality == 1, bid, NA))
 
 agg.bids.quality <- aggregate(all.data[c("bid.qL", "bid.qH")],
-                         by=list(all.data$treatment, all.data$cohort.number),
+                         by=list(all.data$treatment, all.data$sub, all.data$cohort.number),
                          FUN=mean, na.rm=TRUE)
+
+agg.bids.quality <- rename(agg.bids.quality, c("Group.1"="treatment", "Group.2" = "sub", "Group.3"="cohort.number"))
+
+describeBy(agg.bids.quality[,c(4:5)], agg.bids.quality$treatment)
+describeBy(agg.bids.quality[,c(4:5)], agg.bids.quality$sub)
+
+#' Comparison: One-tailed Wilcoxon Signed Rank test for paired sample comparison
+df <- subset(agg.bids.quality, sub == "0")
+wilcox.test(df$bid.qL, df$bid.qH, alternative = c("two.sided"), paired = TRUE) 
+
+df <- subset(agg.bids.quality, sub == "mu1")
+wilcox.test(df$bid.qL, df$bid.qH, alternative = c("two.sided"), paired = TRUE) 
+
+df <- subset(agg.bids.quality, sub == "mu2")
+wilcox.test(df$bid.qL, df$bid.qH, alternative = c("two.sided"), paired = TRUE) 
+
+# Main treatments
+
+agg.bids.quality <- aggregate(all.data[c("bid.qL", "bid.qH")],
+                              by=list(all.data$treatment, all.data$cohort.number),
+                              FUN=mean, na.rm=TRUE)
 
 agg.bids.quality <- rename(agg.bids.quality, c("Group.1"="treatment", "Group.2"="cohort.number"))
 
 describeBy(agg.bids.quality[,c(3:4)], agg.bids.quality$treatment)
 
-#' Comparison: One-tailed Wilcoxon Signed Rank test for paired sample comparison
 df <- subset(agg.bids.quality, treatment == "Voluntary")
 wilcox.test(df$bid.qL, df$bid.qH, alternative = c("two.sided"), paired = TRUE) 
 
