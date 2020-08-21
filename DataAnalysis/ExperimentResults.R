@@ -172,29 +172,26 @@ write_csv(des.Cohort.Sub, "DataAnalysis/SummStatArb.csv")
 
 # A. Winning bids and trade efficiency over time.
 # *2 axes plot
-
-ts.data <- aggregate(all.data[c("bid.low", "floor", "product.quality", "y", "y.high", "y.low", "ypct", "ypct.high", "ypct.low", "par.mu1", "par.mu2", "efficiency")],
-                         by=list(all.data$treatment, all.data$sub, all.data$period),
+ts.data <- all.data
+ts.data$condition <- as.factor(ifelse(all.data$sub == "0", "Voluntary", ifelse(all.data$order == "12", "Arbitrator-LH", "Arbitrator-HL")))
+ts.data <- aggregate(ts.data[c("bid.low", "floor", "product.quality", "y", "y.high", "y.low", "ypct", "ypct.high", "ypct.low", "par.mu1", "par.mu2", "efficiency")],
+                         by=list(ts.data$condition, ts.data$period),
                          FUN=mean, na.rm=TRUE)
 ts.data$ypct <- round(ts.data$ypct, digits=4)
 ts.data$ypct.high <- round(ts.data$ypct.high, digits=4)
 ts.data$ypct.low <- round(ts.data$ypct.low, digits=4)
 
-ts.data <- rename(ts.data, c("Group.1"="treatment", "Group.2"="sub", "Group.3"="period"))
+ts.data <- rename(ts.data, c("Group.1"="treatment", "Group.2"="period"))
 
-ts.data <- mutate(ts.data, condition = ifelse(sub=="0", "Voluntary",
-                                                                ifelse(sub=="mu1", "mu1", "mu2")))
+ts.data$treatment <- relevel(ts.data$treatment, ref = "Arbitrator-LH")
+ts.data$treatment <- relevel(ts.data$treatment, ref = "Voluntary")
+ts.data$treatment
 
-ts.data$condition <- as.factor(ts.data$condition)
-ts.data$condition <- relevel(ts.data$condition, ref = "Voluntary")
-ts.data$condition
+ts.data <- mutate(ts.data, bid.theory.vol = ifelse(treatment == "Voluntary", 1.2, NA))
+ts.data <- mutate(ts.data, bid.theory.mu1 = ifelse((treatment == "Arbitrator-LH" & period<16)|(treatment == "Arbitrator-HL" & period>15), 0.8, NA))
+ts.data <- mutate(ts.data, bid.theory.mu2 = ifelse((treatment == "Arbitrator-HL" & period<16)|(treatment == "Arbitrator-LH" & period>15), 0.64, NA))
 
-ts.data <- mutate(ts.data, bid.theory = ifelse(condition=="Voluntary", 120, 
-                                                                   ifelse(condition=="mu1", 80, 64)))
-
-ts.data <- mutate(ts.data, restart = ifelse(condition=="Voluntary", NA, 15))
-
-ts.data <- ts.data[, -c(1:2)]
+ts.data <- mutate(ts.data, change = ifelse(treatment=="Voluntary", NA, 16))
 
 ts.data.rec <- ts.data
 ts.data.rec$bid.low.rescale <- ts.data.rec$bid.low/100
@@ -202,23 +199,24 @@ ts.data.rec$floor.rescale <- ts.data.rec$floor/100
 ts.data.rec$y.rescale <- ts.data.rec$y/100
 ts.data.rec$y.high.rescale <- ts.data.rec$y.high/100
 ts.data.rec$y.low.rescale <- ts.data.rec$y.low/100
-ts.data.rec$bid.theory.rescale <- ts.data.rec$bid.theory/100
 ts.data.rec$product.quality.rescale <- ts.data.rec$product.quality+0.5
 ts.data.rec$efficiency.rescale <- ts.data.rec$efficiency+0.5
 
 graph_A <- gather(ts.data.rec,
                     value = "value",
                     key = "type",
-                    bid.low.rescale, bid.theory.rescale, efficiency.rescale)
+                    bid.low.rescale, bid.theory.vol, efficiency.rescale)
 
 png(filename = "DataAnalysis/A.ts.bid.low.eff.png",height=800,width=800)  
 
-p <- ggplot(graph_A, aes(x = period, y=value)) +
-  facet_wrap(condition~., nrow=3, labeller = labeller(condition = labs1))+
-  geom_line(aes(linetype = type), size=1) +
-  geom_vline(aes(xintercept = restart), linetype = "dashed") +
-  scale_linetype_manual(name = "", values = c("solid","dotted", "dotdash"), labels=c("Average winning bid (left axis)", 
-                                                                                     "Competitive bid level (left axis)",
+p <- ggplot(graph_A, aes(x = period)) +
+  facet_wrap(treatment~., nrow=3)+
+  geom_line(aes(linetype = type, y=value), size=1) +
+  geom_vline(aes(xintercept = change), linetype = "dashed") +
+  geom_line(aes(y = bid.theory.mu1), linetype = "dotted", size=1) +
+  geom_line(aes(y = bid.theory.mu2), linetype = "dotted", size=1) +
+  scale_linetype_manual(name = "", values = c("solid","dotted","dotdash"), labels=c("Average winning bid (left axis)", 
+                                                                                    "Competitive bid level (left axis)",
                                                                                     "Efficiency (right axis)")) +
   scale_y_continuous(name = "Price (normalized / 100) \n", limits = c(0.5,1.5), 
                      sec.axis = sec_axis(~.-0.5, name = "Realized proportion of surplus \n")) + 
@@ -256,9 +254,9 @@ graph_B <- gather(ts.data.rec,
 png(filename = "DataAnalysis/B.ts.range.proposal.png",height=800,width=800)  
 
 p <- ggplot(graph_B, aes(x = period, y=value)) +
-  facet_wrap(condition~., nrow=3, labeller = labeller(condition = labs1))+
+  facet_wrap(treatment~., nrow=3)+
   geom_line(aes(linetype = type), size=1) +
-  geom_vline(aes(xintercept = restart), linetype = "dashed") +
+  geom_vline(aes(xintercept = change), linetype = "dashed") +
   scale_linetype_manual(name = "", values = c("solid","solid", "dotdash", "dotted"), labels=c("Average winning bid", 
                                                                                      "Average lower bound price",
                                                                                      "Average buyer proposal high quality", 
@@ -459,12 +457,12 @@ Cohort.Main.mu1$sub <- droplevels(Cohort.Main.mu1$sub, exclude = if(anyNA(levels
 Cohort.Main.mu2 <- subset(Cohort.Main.Sub, sub!="mu1")
 Cohort.Main.mu2$sub <- droplevels(Cohort.Main.mu2$sub, exclude = if(anyNA(levels(Cohort.Main.mu2$sub))) NULL else NA)
 
-#' Subset Main to have a look at experienced subjects
+#' Experienced sellers in new environment Arbitrator (check for learning)
 
-experienced.data <- subset(all.data, period>15)
+experienced.data <- subset(Arbitrator, (period>10&period<16) | (period>25))
 
 Cohort.Main.exp <- aggregate(experienced.data[c("bid", "strategy.quality", "bid.low", "product.quality", "proposal.ratio", "proposal.ratio.low", "proposal.ratio.high", "ypct", "ypct.low", "ypct.high", "group.seller_appeal", "seller_appeal.low", "seller_appeal.high", "p", "p.low", "p.high", "group.buyer_payoff", "buyer_payoff.low", "buyer_payoff.high", "group.seller_payoff", "seller_payoff.low", "seller_payoff.high", "efficiency")],
-                         by=list(experienced.data$treatment, experienced.data$cohort.number),
+                         by=list(experienced.data$sub, experienced.data$cohort.number),
                          FUN=mean, na.rm=TRUE)
 
 Cohort.Main.exp <- rename(Cohort.Main.exp, c("Group.1"="treatment", "Group.2"="cohort.number"))
@@ -507,14 +505,6 @@ tapply(Cohort.Main$bid.low, Cohort.Main$treatment, summary)
   wilcox.test(Cohort.Main.mu1$bid.low~Cohort.Main.mu1$sub, alternative = c("greater")) 
 
   wilcox.test(Cohort.Main.mu2$bid.low~Cohort.Main.mu2$sub, alternative = c("greater")) 
-
-  # Experienced data only
-  
-  wilcox.test(Cohort.Main.exp$bid~Cohort.Main.exp$treatment, alternative = c("greater")) 
-  tapply(Cohort.Main.exp$bid, Cohort.Main.exp$treatment, summary)
-  
-  wilcox.test(Cohort.Main.exp$bid.low~Cohort.Main.exp$treatment, alternative = c("greater")) 
-  tapply(Cohort.Main.exp$bid.low, Cohort.Main.exp$treatment, summary)
 
   #' Bid profile / distribution
   #' WSR tests do not capture variety of bids observed
@@ -688,12 +678,24 @@ ks.test(dist.mu1$bid.low, dist.mu2$bid.low, alternative = c("two.sided"))
 summary(dist.mu1$bid.low)
 summary(dist.mu2$bid.low)
 
-# Check learning. Check mu1 for order 21 and mu2 for order 12 against predictions
-# corresponds to periods 16 to 30
+# Check spillovers. Check mu1 for order 12 and mu2 for order 21 against predictions
+# corresponds to periods 1 to 15
 
-experienced.sub <- subset(Cohort.Sub, (sub == "mu1" & order == "21")|(sub == "mu2" & order == "12"))
+no.spillover.sub <- subset(Cohort.Sub, (sub == "mu1" & order == "12")|(sub == "mu2" & order == "21"))
+no.spillover.sub$sub <- droplevels(no.spillover.sub$sub, exclude = if(anyNA(levels(no.spillover.sub$sub))) NULL else NA)
 
-des.experienced.sub <- describeBy(experienced.sub, experienced.sub$Sub,
+des.no.spillover.sub <- describeBy(no.spillover.sub, no.spillover.sub$sub, mat=TRUE,digits=2)  #matrix output
+
+des.no.spillover.sub <- rename(des.no.spillover.sub, c("group1"="Sub"))
+des.no.spillover.sub <- subset(des.no.spillover.sub, select=c(2, 7))
+des.no.spillover.sub <- des.no.spillover.sub[-c(1:6, 53:54), ]
+
+write_csv(des.no.spillover.sub, "DataAnalysis/SummStatNoSpilloverArb.csv")
+
+# Check learning
+
+Cohort.Main.exp$treatment <- droplevels(Cohort.Main.exp$treatment, exclude = if(anyNA(levels(Cohort.Main.exp$treatment))) NULL else NA)
+des.experienced.sub <- describeBy(Cohort.Main.exp, Cohort.Main.exp$treatment,
                                   mat=TRUE,digits=2)  #matrix output
 
 des.experienced.sub <- rename(des.experienced.sub, c("group1"="Sub"))
@@ -701,6 +703,12 @@ des.experienced.sub <- subset(des.experienced.sub, select=c(2, 7))
 des.experienced.sub <- des.experienced.sub[-c(1:6, 53:54), ]
 
 write_csv(des.experienced.sub, "DataAnalysis/SummStatExperiencedArb.csv")
+
+wilcox.test(Cohort.Main.exp$bid~Cohort.Main.exp$treatment, alternative = c("two.sided"), paired = TRUE) 
+tapply(Cohort.Main.exp$bid, Cohort.Main.exp$treatment, summary)
+
+wilcox.test(Cohort.Main.exp$bid.low~Cohort.Main.exp$treatment, alternative = c("two.sided"), paired = TRUE) 
+tapply(Cohort.Main.exp$bid.low, Cohort.Main.exp$treatment, summary)
 
   # Quality
 
@@ -840,16 +848,16 @@ tapply(Cohort.Sub$group.buyer_payoff, Cohort.Sub$sub, summary)
 
   # Seller
 
-wilcox.test(Cohort.Main$group.seller_payoff~Cohort.Main$treatment, alternative = c("less")) 
+wilcox.test(Cohort.Main$group.seller_payoff~Cohort.Main$treatment, alternative = c("two.sided")) 
 tapply(Cohort.Main$group.seller_payoff, Cohort.Main$treatment, summary)
 
-wilcox.test(Cohort.Main.mu1$group.seller_payoff~Cohort.Main.mu1$sub, alternative = c("less")) 
+wilcox.test(Cohort.Main.mu1$group.seller_payoff~Cohort.Main.mu1$sub, alternative = c("two.sided")) 
 tapply(Cohort.Main.mu1$group.seller_payoff, Cohort.Main.mu1$sub, summary)
 
-wilcox.test(Cohort.Main.mu2$group.seller_payoff~Cohort.Main.mu2$sub, alternative = c("less")) 
+wilcox.test(Cohort.Main.mu2$group.seller_payoff~Cohort.Main.mu2$sub, alternative = c("two.sided")) 
 tapply(Cohort.Main.mu2$group.seller_payoff, Cohort.Main.mu2$sub, summary)
 
-wilcox.test(Cohort.Sub$group.seller_payoff~Cohort.Sub$sub, alternative = c("less"), paired=TRUE) 
+wilcox.test(Cohort.Sub$group.seller_payoff~Cohort.Sub$sub, alternative = c("two.sided"), paired=TRUE) 
 tapply(Cohort.Sub$group.seller_payoff, Cohort.Sub$sub, summary)
 
 # Comparative by quality between main versus sub-treatments / within sub-treatments
@@ -903,69 +911,71 @@ wilcox.test(Cohort.Sub$seller_payoff.high~Cohort.Sub$sub, alternative = c("two.s
 tapply(Cohort.Sub$seller_payoff.high, Cohort.Sub$sub, summary)
 
 ##################################
-### Robustness check quality/efficiency for null results in hypothesized direction ###
+### Power check for null results Mu2 versus 0 ###
 ##################################
 
-# sample takes a sample of the specified size from the elements of x using either with or without replacement.
+mean1 <- mean(subset(Cohort.Main.mu2$efficiency, Cohort.Main.mu2$sub == "0"))
+sd1 <- sd(subset(Cohort.Main.mu2$efficiency, Cohort.Main.mu2$sub == "0"))
+mean2 <- mean(subset(Cohort.Main.mu2$efficiency, Cohort.Main.mu2$sub == "mu2"))
+sd2 <- sd(subset(Cohort.Main.mu2$efficiency, Cohort.Main.mu2$sub == "mu2"))
 
-p.values <- length (1000)     # Empty object to collect p-values
+mean1 <- mean(subset(Cohort.Main.mu2$group.seller_payoff, Cohort.Main.mu2$sub == "0"))
+sd1 <- sd(subset(Cohort.Main.mu2$group.seller_payoff, Cohort.Main.mu2$sub == "0"))
+mean2 <- mean(subset(Cohort.Main.mu2$group.seller_payoff, Cohort.Main.mu2$sub == "mu2"))
+sd2 <- sd(subset(Cohort.Main.mu2$group.seller_payoff, Cohort.Main.mu2$sub == "mu2"))
 
-for (i in 1 : 1000) {
-  
-  vol.resample <- sample(subset(Cohort.Main$product.quality, Cohort.Main$treatment == "Voluntary"), 24, replace = TRUE)
-  arb.resample <- sample(subset(Cohort.Main$product.quality, Cohort.Main$treatment == "Arbitrator"), 24, replace = TRUE)
-  p.values[i] <- wilcox.test(vol.resample, arb.resample, alternative = c("less"))$p.value
-   
-}
+  # Check power
 
-summary(p.values)
+N <- 6
 
-p.values <- length (1000)     # Empty object to collect p-values
+pval <- replicate(1000, wilcox.test(rnorm(N,mean1,sd1), rnorm(N,mean2,sd2), alternative = c("less"))$p.value)
+summary(pval)
+# Power (%)
+(sum(pval < .05) / 1000) * 100
 
-for (i in 1 : 1000) {
-  
-  vol.resample <- sample(subset(Cohort.Main$efficiency, Cohort.Main$treatment == "Voluntary"), 24, replace = TRUE)
-  arb.resample <- sample(subset(Cohort.Main$efficiency, Cohort.Main$treatment == "Arbitrator"), 24, replace = TRUE)
-  p.values[i] <- wilcox.test(vol.resample, arb.resample, alternative = c("less"))$p.value
-  
-}
+# # Sample takes a sample of the specified size from the elements of x using either with or without replacement
+# 
+# p.values <- length (1000)     # Empty object to collect p-values
+# 
+# for (i in 1 : 1000) {
+#   
+#   vol.resample <- sample(subset(Cohort.Main.mu2$group.seller_payoff, Cohort.Main.mu2$sub == "0"), N, replace = TRUE)
+#   arb.resample <- sample(subset(Cohort.Main.mu2$group.seller_payoff, Cohort.Main.mu2$sub == "mu2"), N, replace = TRUE)
+#   p.values[i] <- wilcox.test(vol.resample, arb.resample, alternative = c("less"))$p.value
+#   
+# }
 
-summary(p.values)
+# summary(p.values)
 
-p.values <- length (1000)     # Empty object to collect p-values
+##################################
+### Arbitrator Randomization check ###
+##################################
 
-for (i in 1 : 1000) {
-  
-  vol.resample <- sample(subset(Cohort.Main.mu2$group.seller_payoff, Cohort.Main.mu2$sub == "0"), 24, replace = TRUE)
-  arb.resample <- sample(subset(Cohort.Main.mu2$group.seller_payoff, Cohort.Main.mu2$sub == "mu2"), 24, replace = TRUE)
-  p.values[i] <- wilcox.test(vol.resample, arb.resample, alternative = c("less"))$p.value
-  
-}
+arb.available <- na.omit(Arbitrator$arb.available)
 
-summary(p.values)
-
-p.values <- length (1000)     # Empty object to collect p-values
-
-for (i in 1 : 1000) {
-  
-  vol.resample <- sample(subset(Cohort.Sub$group.seller_payoff, Cohort.Sub$sub == "mu1"), 24, replace = TRUE)
-  arb.resample <- sample(subset(Cohort.Sub$group.seller_payoff, Cohort.Sub$sub == "mu2"), 24, replace = TRUE)
-  p.values[i] <- wilcox.test(vol.resample, arb.resample, alternative = c("less"), paired=TRUE)$p.value
-  
-}
-
-summary(p.values)
+#' Two-tailed binomial test of group-level data 
+binom.test(sum(arb.available), length(arb.available), p = 0.5,
+           alternative = c("t"),
+           conf.level = 0.95)
 
 ##################################
 ### Analysis of matching group data ###
 ##################################
 
 # prep data
-matching.data <- aggregate(all.data[c("bid.low", "product.quality","ypct","group.buyer_payoff","group.seller_payoff")],
+
+matching.data <- aggregate(all.data[c("bid.low", "product.quality","efficiency","ypct","group.buyer_payoff","group.seller_payoff")],
                         by=list(all.data$sub, all.data$cohort.number, all.data$period, all.data$group.period.id),
                         FUN=mean, na.rm=TRUE)
 
 matching.data <- rename(matching.data, c("Group.1"="sub", "Group.2"="cohort.number", "Group.3"="period", "Group.4"="group.period.id"))
+
+### STATA export for matching group data analysis ###
+
+library(foreign)
+write.dta(matching.data, "DataAnalysis/Stata/Data/matching_gp_data.dta")
+
+## R Version ###
 
 # ols
 ols1 <- lm(data = matching.data, formula=bid.low ~ sub + period) 
@@ -981,8 +991,6 @@ bptest(ols1)
 # cluster-robust SEs
 validation.1 <- miceadds::lm.cluster( data = matching.data, formula=bid.low ~ sub + period, cluster="cohort.number" )
 summary(validation.1)
-
-linearHypothesis(validation.1, "1*submu1 = submu2")
 
 validation.2 <- miceadds::glm.cluster( data = matching.data, formula=product.quality ~ sub + period, cluster="cohort.number", family="binomial" )
 summary(validation.2)
