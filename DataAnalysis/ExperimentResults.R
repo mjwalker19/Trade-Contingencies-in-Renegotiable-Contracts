@@ -467,6 +467,57 @@ Cohort.Main.exp <- aggregate(experienced.data[c("bid", "strategy.quality", "bid.
 
 Cohort.Main.exp <- rename(Cohort.Main.exp, c("Group.1"="treatment", "Group.2"="cohort.number"))
 
+
+### Headline table aggregate findings
+
+wilcox.test(Cohort.Main.mu1$bid.low~Cohort.Main.mu1$sub, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main.mu2$bid.low~Cohort.Main.mu2$sub, alternative = c("two.sided")) 
+
+wilcox.test(Cohort.Main.mu1$product.quality~Cohort.Main.mu1$sub, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main.mu2$product.quality~Cohort.Main.mu2$sub, alternative = c("two.sided")) 
+
+wilcox.test(Cohort.Main.mu1$ypct~Cohort.Main.mu1$sub, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main.mu2$ypct~Cohort.Main.mu2$sub, alternative = c("two.sided"))
+
+wilcox.test(Cohort.Main.mu1$ypct.low~Cohort.Main.mu1$sub, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main.mu2$ypct.low~Cohort.Main.mu2$sub, alternative = c("two.sided"))
+
+wilcox.test(Cohort.Main.mu1$ypct.high~Cohort.Main.mu1$sub, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main.mu2$ypct.high~Cohort.Main.mu2$sub, alternative = c("two.sided"))
+
+wilcox.test(Cohort.Main.mu1$p~Cohort.Main.mu1$sub, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main.mu2$p~Cohort.Main.mu2$sub, alternative = c("two.sided"))
+
+wilcox.test(Cohort.Main.mu1$p~Cohort.Main.mu1$sub, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main.mu2$p~Cohort.Main.mu2$sub, alternative = c("two.sided"))
+
+wilcox.test(Cohort.Main.mu1$p.low~Cohort.Main.mu1$sub, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main.mu2$p.low~Cohort.Main.mu2$sub, alternative = c("two.sided"))
+
+wilcox.test(Cohort.Main.mu1$p.high~Cohort.Main.mu1$sub, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main.mu2$p.high~Cohort.Main.mu2$sub, alternative = c("two.sided"))
+
+wilcox.test(Cohort.Main.mu1$group.buyer_payoff~Cohort.Main.mu1$sub, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main.mu2$group.buyer_payoff~Cohort.Main.mu2$sub, alternative = c("two.sided"))
+
+wilcox.test(Cohort.Main.mu1$buyer_payoff.low~Cohort.Main.mu1$sub, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main.mu2$buyer_payoff.low~Cohort.Main.mu2$sub, alternative = c("two.sided"))
+
+wilcox.test(Cohort.Main.mu1$buyer_payoff.high~Cohort.Main.mu1$sub, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main.mu2$buyer_payoff.high~Cohort.Main.mu2$sub, alternative = c("two.sided"))
+
+wilcox.test(Cohort.Main.mu1$group.seller_payoff~Cohort.Main.mu1$sub, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main.mu2$group.seller_payoff~Cohort.Main.mu2$sub, alternative = c("two.sided"))
+
+wilcox.test(Cohort.Main.mu1$seller_payoff.low~Cohort.Main.mu1$sub, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main.mu2$seller_payoff.low~Cohort.Main.mu2$sub, alternative = c("two.sided"))
+
+wilcox.test(Cohort.Main.mu1$seller_payoff.high~Cohort.Main.mu1$sub, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main.mu2$seller_payoff.high~Cohort.Main.mu2$sub, alternative = c("two.sided"))
+
+wilcox.test(Cohort.Main.mu1$efficiency~Cohort.Main.mu1$sub, alternative = c("two.sided")) 
+wilcox.test(Cohort.Main.mu2$efficiency~Cohort.Main.mu2$sub, alternative = c("two.sided")) 
+
 #### Hypothesis: Winning bids are lower in Arbitrator than in Voluntary. 
 
   #' Point predictions: Two-tailed Wilcoxon Signed-Rank Test for one-sample comparison
